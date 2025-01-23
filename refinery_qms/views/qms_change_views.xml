@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Change Request Form View -->
+        <record id="view_qms_change_form" model="ir.ui.view">
+            <field name="name">qms.change.form</field>
+            <field name="model">qms.change</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_submit" string="Submit" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_analyze" string="Start Analysis" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'submitted')]}"/>
+                        <button name="action_request_approval" string="Request Approval" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'analysis')]}"/>
+                        <button name="action_approve" string="Approve" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'approval')]}"/>
+                        <button name="action_implement" string="Start Implementation" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'planning')]}"/>
+                        <button name="action_verify" string="Start Verification" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'implementation')]}"/>
+                        <button name="action_complete" string="Complete" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'verification')]}"/>
+                        <button name="action_reject" string="Reject" 
+                                type="object"
+                                attrs="{'invisible': [('state', 'not in', ['submitted', 'analysis', 'approval'])]}"/>
+                        <button name="action_cancel" string="Cancel" 
+                                type="object"
+                                attrs="{'invisible': [('state', 'in', ['completed', 'rejected', 'cancelled'])]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Change Title"/>
+                            </h1>
+                            <h2>
+                                <field name="code"/>
+                            </h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="type"/>
+                                <field name="priority" widget="priority"/>
+                                <field name="process_id"/>
+                                <field name="department_id"/>
+                            </group>
+                            <group>
+                                <field name="requester_id"/>
+                                <field name="owner_id"/>
+                                <field name="approver_id"/>
+                                <field name="request_date"/>
+                                <field name="planned_date"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Description">
+                                <group>
+                                    <field name="description"/>
+                                    <field name="justification"/>
+                                    <field name="objectives"/>
+                                </group>
+                            </page>
+                            <page string="Risk Assessment">
+                                <field name="risk_assessment_required"/>
+                                <field name="risk_assessment_ids" attrs="{'invisible': [('risk_assessment_required', '=', False)]}">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="likelihood"/>
+                                        <field name="impact"/>
+                                        <field name="risk_level"/>
+                                        <field name="mitigation_plan"/>
+                                        <field name="responsible_id"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Impact Analysis">
+                                <field name="impact_analysis_ids">
+                                    <tree editable="bottom">
+                                        <field name="area"/>
+                                        <field name="description"/>
+                                        <field name="severity"/>
+                                        <field name="mitigation_required"/>
+                                        <field name="mitigation_plan"/>
+                                        <field name="responsible_id"/>
+                                        <field name="verification_required"/>
+                                        <field name="verification_method"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Resources">
+                                <field name="resource_ids">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="type"/>
+                                        <field name="quantity"/>
+                                        <field name="unit"/>
+                                        <field name="cost"/>
+                                        <field name="start_date"/>
+                                        <field name="end_date"/>
+                                        <field name="provider"/>
+                                    </tree>
+                                </field>
+                                <group class="oe_subtotal_footer">
+                                    <field name="total_cost" widget="monetary"/>
+                                </group>
+                            </page>
+                            <page string="Implementation">
+                                <field name="task_ids">
+                                    <tree>
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name"/>
+                                        <field name="assigned_to_id"/>
+                                        <field name="planned_start"/>
+                                        <field name="planned_end"/>
+                                        <field name="progress" widget="progressbar"/>
+                                        <field name="state"/>
+                                        <field name="verification_required"/>
+                                        <field name="verification_result"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Verification">
+                                <group>
+                                    <field name="verification_plan"/>
+                                    <field name="verification_results"/>
+                                    <field name="verification_status"/>
+                                </group>
+                            </page>
+                            <page string="Effectiveness">
+                                <group>
+                                    <field name="effectiveness_criteria"/>
+                                    <field name="effectiveness_review"/>
+                                    <field name="effectiveness_date"/>
+                                    <field name="lessons_learned"/>
+                                </group>
+                            </page>
+                            <page string="Documents">
+                                <field name="document_ids"/>
+                            </page>
+                            <page string="Attachments">
+                                <field name="attachment_ids" widget="many2many_binary"/>
+                            </page>
+                            <page string="Notes">
+                                <field name="notes"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Change Request Tree View -->
+        <record id="view_qms_change_tree" model="ir.ui.view">
+            <field name="name">qms.change.tree</field>
+            <field name="model">qms.change</field>
+            <field name="arch" type="xml">
+                <tree decoration-info="state in ['draft', 'submitted']"
+                      decoration-warning="state in ['analysis', 'approval', 'planning']"
+                      decoration-success="state == 'completed'"
+                      decoration-danger="state in ['rejected', 'cancelled']">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="priority" widget="priority"/>
+                    <field name="process_id"/>
+                    <field name="requester_id"/>
+                    <field name="planned_date"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Change Request Search View -->
+        <record id="view_qms_change_search" model="ir.ui.view">
+            <field name="name">qms.change.search</field>
+            <field name="model">qms.change</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="type"/>
+                    <field name="process_id"/>
+                    <field name="requester_id"/>
+                    <separator/>
+                    <filter string="My Changes" name="my_changes" 
+                            domain="['|', ('requester_id', '=', uid), ('owner_id', '=', uid)]"/>
+                    <filter string="High Priority" name="high_priority" 
+                            domain="[('priority', 'in', ['2', '3'])]"/>
+                    <filter string="In Progress" name="in_progress" 
+                            domain="[('state', 'in', ['analysis', 'approval', 'planning', 'implementation'])]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Type" name="group_type" 
+                                context="{'group_by': 'type'}"/>
+                        <filter string="Process" name="group_process" 
+                                context="{'group_by': 'process_id'}"/>
+                        <filter string="State" name="group_state" 
+                                context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Change Request Action Window -->
+        <record id="action_qms_change" model="ir.actions.act_window">
+            <field name="name">Change Management</field>
+            <field name="res_model">qms.change</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_qms_change_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first change request!
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_qms_change"
+                  name="Change Management"
+                  parent="menu_qms_root"
+                  action="action_qms_change"
+                  sequence="45"/>
+    </data>
+</odoo>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Training Form View -->
+        <record id="view_qms_training_form" model="ir.ui.view">
+            <field name="name">qms.training.form</field>
+            <field name="model">qms.training</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_plan" string="Plan" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_start" string="Start Training" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'planned')]}"/>
+                        <button name="action_complete" string="Complete" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'in_progress')]}"/>
+                        <button name="action_cancel" string="Cancel" 
+                                type="object"
+                                attrs="{'invisible': [('state', 'in', ['completed', 'cancelled'])]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Training Title"/>
+                            </h1>
+                            <h2>
+                                <field name="code"/>
+                            </h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="type"/>
+                                <field name="process_id"/>
+                                <field name="department_id"/>
+                                <field name="trainer_id"/>
+                            </group>
+                            <group>
+                                <field name="date_start"/>
+                                <field name="date_end"/>
+                                <field name="duration"/>
+                                <field name="effectiveness_evaluation"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Details">
+                                <group>
+                                    <field name="objective"/>
+                                    <field name="prerequisites"/>
+                                    <field name="content"/>
+                                </group>
+                            </page>
+                            <page string="Participants">
+                                <group>
+                                    <group>
+                                        <field name="max_participants"/>
+                                        <field name="min_participants"/>
+                                    </group>
+                                    <group>
+                                        <field name="evaluation_method"/>
+                                        <field name="passing_score"/>
+                                    </group>
+                                </group>
+                                <field name="participant_ids">
+                                    <tree>
+                                        <field name="employee_id"/>
+                                        <field name="attendance"/>
+                                        <field name="score"/>
+                                        <field name="result"/>
+                                        <field name="certificate_number"/>
+                                        <field name="expiry_date"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Certification">
+                                <group>
+                                    <field name="requires_renewal"/>
+                                    <field name="certificate_validity" 
+                                           attrs="{'invisible': [('requires_renewal', '=', False)]}"/>
+                                </group>
+                            </page>
+                            <page string="Attachments">
+                                <field name="attachment_ids" widget="many2many_binary"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Training Tree View -->
+        <record id="view_qms_training_tree" model="ir.ui.view">
+            <field name="name">qms.training.tree</field>
+            <field name="model">qms.training</field>
+            <field name="arch" type="xml">
+                <tree decoration-info="state == 'draft'"
+                      decoration-warning="state == 'in_progress'"
+                      decoration-success="state == 'completed'"
+                      decoration-danger="state == 'cancelled'">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="date_start"/>
+                    <field name="date_end"/>
+                    <field name="trainer_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Training Search View -->
+        <record id="view_qms_training_search" model="ir.ui.view">
+            <field name="name">qms.training.search</field>
+            <field name="model">qms.training</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="type"/>
+                    <field name="trainer_id"/>
+                    <separator/>
+                    <filter string="My Trainings" name="my_trainings" 
+                            domain="[('trainer_id', '=', uid)]"/>
+                    <filter string="Upcoming" name="upcoming" 
+                            domain="[('date_start', '>=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="In Progress" name="in_progress" 
+                            domain="[('state', '=', 'in_progress')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Type" name="group_type" 
+                                context="{'group_by': 'type'}"/>
+                        <filter string="Trainer" name="group_trainer" 
+                                context="{'group_by': 'trainer_id'}"/>
+                        <filter string="State" name="group_state" 
+                                context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Competency Matrix Form View -->
+        <record id="view_qms_competency_matrix_form" model="ir.ui.view">
+            <field name="name">qms.competency.matrix.form</field>
+            <field name="model">qms.competency.matrix</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="process_id"/>
+                                <field name="position_id"/>
+                            </group>
+                            <group>
+                                <field name="renewal_frequency"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Requirements">
+                                <group>
+                                    <field name="knowledge_requirements"/>
+                                    <field name="skill_requirements"/>
+                                    <field name="experience_requirements"/>
+                                    <field name="certification_requirements"/>
+                                </group>
+                            </page>
+                            <page string="Required Training">
+                                <field name="required_training_ids"/>
+                            </page>
+                            <page string="Notes">
+                                <field name="notes"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Competency Matrix Tree View -->
+        <record id="view_qms_competency_matrix_tree" model="ir.ui.view">
+            <field name="name">qms.competency.matrix.tree</field>
+            <field name="model">qms.competency.matrix</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="process_id"/>
+                    <field name="position_id"/>
+                    <field name="renewal_frequency"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action Windows -->
+        <record id="action_qms_training" model="ir.actions.act_window">
+            <field name="name">Training</field>
+            <field name="res_model">qms.training</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_qms_training_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first training program!
+                </p>
+            </field>
+        </record>
+
+        <record id="action_qms_competency_matrix" model="ir.actions.act_window">
+            <field name="name">Competency Matrix</field>
+            <field name="res_model">qms.competency.matrix</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Define competency requirements for positions!
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_qms_training_root"
+                  name="Training"
+                  parent="menu_qms_root"
+                  sequence="70"/>
+                  
+        <menuitem id="menu_qms_training"
+                  name="Training Programs"
+                  parent="menu_qms_training_root"
+                  action="action_qms_training"
+                  sequence="10"/>
+                  
+        <menuitem id="menu_qms_competency_matrix"
+                  name="Competency Matrix"
+                  parent="menu_qms_training_root"
+                  action="action_qms_competency_matrix"
+                  sequence="20"/>
+    </data>
+</odoo>

@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Equipment Form View -->
+        <record id="view_qms_equipment_form" model="ir.ui.view">
+            <field name="name">qms.equipment.form</field>
+            <field name="model">qms.equipment</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Equipment Name"/>
+                            </h1>
+                            <h2>
+                                <field name="code"/>
+                            </h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="type"/>
+                                <field name="serial_number"/>
+                                <field name="manufacturer"/>
+                                <field name="model"/>
+                            </group>
+                            <group>
+                                <field name="location"/>
+                                <field name="department_id"/>
+                                <field name="process_id"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Technical Details">
+                                <group>
+                                    <field name="measurement_range"/>
+                                    <field name="accuracy"/>
+                                    <field name="resolution"/>
+                                </group>
+                            </page>
+                            <page string="Calibration">
+                                <group>
+                                    <field name="calibration_frequency"/>
+                                    <field name="last_calibration"/>
+                                    <field name="next_calibration"/>
+                                </group>
+                                <field name="calibration_ids">
+                                    <tree>
+                                        <field name="name"/>
+                                        <field name="date"/>
+                                        <field name="type"/>
+                                        <field name="performed_by"/>
+                                        <field name="result"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Equipment Tree View -->
+        <record id="view_qms_equipment_tree" model="ir.ui.view">
+            <field name="name">qms.equipment.tree</field>
+            <field name="model">qms.equipment</field>
+            <field name="arch" type="xml">
+                <tree decoration-danger="next_calibration &lt; current_date"
+                      decoration-warning="next_calibration &lt;= (current_date + datetime.timedelta(days=30))">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="serial_number"/>
+                    <field name="location"/>
+                    <field name="last_calibration"/>
+                    <field name="next_calibration"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Equipment Search View -->
+        <record id="view_qms_equipment_search" model="ir.ui.view">
+            <field name="name">qms.equipment.search</field>
+            <field name="model">qms.equipment</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="serial_number"/>
+                    <field name="type"/>
+                    <separator/>
+                    <filter string="Due Calibration" name="due_calibration" 
+                            domain="[('next_calibration', '&lt;=', (context_today() + datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                    <filter string="Active" name="active" 
+                            domain="[('state', '=', 'active')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Type" name="group_type" 
+                                context="{'group_by': 'type'}"/>
+                        <filter string="Department" name="group_department" 
+                                context="{'group_by': 'department_id'}"/>
+                        <filter string="State" name="group_state" 
+                                context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Calibration Form View -->
+        <record id="view_qms_calibration_form" model="ir.ui.view">
+            <field name="name">qms.calibration.form</field>
+            <field name="model">qms.calibration</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_confirm" string="Confirm" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_verify" string="Verify" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="equipment_id"/>
+                                <field name="type"/>
+                                <field name="performed_by"/>
+                                <field name="calibrator_id" 
+                                       attrs="{'invisible': [('performed_by', '=', 'external')]}"/>
+                                <field name="service_provider" 
+                                       attrs="{'invisible': [('performed_by', '=', 'internal')]}"/>
+                            </group>
+                            <group>
+                                <field name="date"/>
+                                <field name="due_date"/>
+                                <field name="result"/>
+                                <field name="certificate_number"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Measurements">
+                                <field name="measurement_points">
+                                    <tree editable="bottom">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="nominal_value"/>
+                                        <field name="measured_value"/>
+                                        <field name="unit"/>
+                                        <field name="tolerance_plus"/>
+                                        <field name="tolerance_minus"/>
+                                        <field name="error"/>
+                                        <field name="within_tolerance"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Details">
+                                <group>
+                                    <field name="reference_equipment_ids" widget="many2many_tags"/>
+                                    <field name="procedure"/>
+                                    <field name="environmental_conditions"/>
+                                    <field name="adjustment_made"/>
+                                    <field name="adjustment_details" 
+                                           attrs="{'invisible': [('adjustment_made', '=', False)]}"/>
+                                    <field name="notes"/>
+                                </group>
+                            </page>
+                            <page string="Certificate">
+                                <group>
+                                    <field name="certificate_file" filename="certificate_number"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Calibration Tree View -->
+        <record id="view_qms_calibration_tree" model="ir.ui.view">
+            <field name="name">qms.calibration.tree</field>
+            <field name="model">qms.calibration</field>
+            <field name="arch" type="xml">
+                <tree decoration-danger="result == 'fail'"
+                      decoration-warning="result == 'conditional'"
+                      decoration-success="result == 'pass'">
+                    <field name="name"/>
+                    <field name="equipment_id"/>
+                    <field name="date"/>
+                    <field name="type"/>
+                    <field name="performed_by"/>
+                    <field name="result"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action Windows -->
+        <record id="action_qms_equipment" model="ir.actions.act_window">
+            <field name="name">Equipment</field>
+            <field name="res_model">qms.equipment</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_qms_equipment_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Register your first measurement equipment!
+                </p>
+            </field>
+        </record>
+
+        <record id="action_qms_calibration" model="ir.actions.act_window">
+            <field name="name">Calibrations</field>
+            <field name="res_model">qms.calibration</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first calibration record!
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_qms_calibration_root"
+                  name="Calibration"
+                  parent="menu_qms_root"
+                  sequence="80"/>
+                  
+        <menuitem id="menu_qms_equipment"
+                  name="Equipment"
+                  parent="menu_qms_calibration_root"
+                  action="action_qms_equipment"
+                  sequence="10"/>
+                  
+        <menuitem id="menu_qms_calibration"
+                  name="Calibrations"
+                  parent="menu_qms_calibration_root"
+                  action="action_qms_calibration"
+                  sequence="20"/>
+    </data>
+</odoo>

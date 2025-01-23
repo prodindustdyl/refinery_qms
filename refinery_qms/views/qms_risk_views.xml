@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Risk Form View -->
+        <record id="view_qms_risk_form" model="ir.ui.view">
+            <field name="name">qms.risk.form</field>
+            <field name="model">qms.risk</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_identify" string="Identify" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_assess" string="Assess" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'identified')]}"/>
+                        <button name="action_treat" string="Start Treatment" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'assessed')]}"/>
+                        <button name="action_monitor" string="Monitor" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'treatment')]}"/>
+                        <button name="action_close" string="Close" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'monitoring')]}"/>
+                        <button name="action_cancel" string="Cancel" 
+                                type="object"
+                                attrs="{'invisible': [('state', 'in', ['closed', 'cancelled'])]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Risk Title"/>
+                            </h1>
+                            <h2>
+                                <field name="code"/>
+                            </h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="type"/>
+                                <field name="category"/>
+                                <field name="process_id"/>
+                                <field name="department_id"/>
+                            </group>
+                            <group>
+                                <field name="owner_id"/>
+                                <field name="assessor_id"/>
+                                <field name="reviewer_id"/>
+                                <field name="identification_date"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Description">
+                                <group>
+                                    <field name="description"/>
+                                    <field name="causes"/>
+                                    <field name="consequences"/>
+                                </group>
+                            </page>
+                            <page string="Assessment">
+                                <group>
+                                    <group string="Initial Assessment">
+                                        <field name="likelihood"/>
+                                        <field name="impact"/>
+                                        <field name="risk_level"/>
+                                        <field name="risk_rating"/>
+                                    </group>
+                                    <group string="Residual Risk">
+                                        <field name="residual_likelihood"/>
+                                        <field name="residual_impact"/>
+                                        <field name="residual_risk_level"/>
+                                    </group>
+                                </group>
+                                <group string="Controls">
+                                    <field name="existing_controls"/>
+                                    <field name="control_effectiveness"/>
+                                </group>
+                            </page>
+                            <page string="Treatment Plans">
+                                <field name="treatment_required"/>
+                                <field name="treatment_plan_ids" attrs="{'invisible': [('treatment_required', '=', False)]}">
+                                    <tree>
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name"/>
+                                        <field name="type"/>
+                                        <field name="responsible_id"/>
+                                        <field name="due_date"/>
+                                        <field name="progress" widget="progressbar"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Monitoring">
+                                <group>
+                                    <field name="monitoring_plan"/>
+                                    <field name="monitoring_frequency"/>
+                                    <field name="next_review_date"/>
+                                </group>
+                                <field name="review_ids">
+                                    <tree>
+                                        <field name="review_date"/>
+                                        <field name="reviewer_id"/>
+                                        <field name="control_effectiveness"/>
+                                        <field name="risk_trend"/>
+                                        <field name="requires_escalation"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Financial">
+                                <group>
+                                    <field name="cost_estimate"/>
+                                    <field name="benefit_estimate"/>
+                                    <field name="roi"/>
+                                </group>
+                            </page>
+                            <page string="Attachments">
+                                <field name="attachment_ids" widget="many2many_binary"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Risk Tree View -->
+        <record id="view_qms_risk_tree" model="ir.ui.view">
+            <field name="name">qms.risk.tree</field>
+            <field name="model">qms.risk</field>
+            <field name="arch" type="xml">
+                <tree decoration-danger="risk_rating == 'extreme'"
+                      decoration-warning="risk_rating == 'high'"
+                      decoration-info="risk_rating == 'medium'"
+                      decoration-success="risk_rating == 'low'">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="category"/>
+                    <field name="process_id"/>
+                    <field name="risk_level"/>
+                    <field name="risk_rating"/>
+                    <field name="owner_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Risk Search View -->
+        <record id="view_qms_risk_search" model="ir.ui.view">
+            <field name="name">qms.risk.search</field>
+            <field name="model">qms.risk</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="type"/>
+                    <field name="category"/>
+                    <field name="process_id"/>
+                    <field name="owner_id"/>
+                    <separator/>
+                    <filter string="My Risks" name="my_risks" 
+                            domain="[('owner_id', '=', uid)]"/>
+                    <filter string="High Priority" name="high_priority" 
+                            domain="[('risk_rating', 'in', ['high', 'extreme'])]"/>
+                    <filter string="Active" name="active" 
+                            domain="[('state', 'not in', ['closed', 'cancelled'])]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Type" name="group_type" 
+                                context="{'group_by': 'type'}"/>
+                        <filter string="Category" name="group_category" 
+                                context="{'group_by': 'category'}"/>
+                        <filter string="Risk Rating" name="group_rating" 
+                                context="{'group_by': 'risk_rating'}"/>
+                        <filter string="State" name="group_state" 
+                                context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Risk Action Window -->
+        <record id="action_qms_risk" model="ir.actions.act_window">
+            <field name="name">Risks & Opportunities</field>
+            <field name="res_model">qms.risk</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_qms_risk_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first risk or opportunity!
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_qms_risk"
+                  name="Risks & Opportunities"
+                  parent="menu_qms_root"
+                  action="action_qms_risk"
+                  sequence="35"/>
+    </data>
+</odoo>

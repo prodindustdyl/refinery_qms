@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Document Type Form View -->
+        <record id="view_qms_document_type_form" model="ir.ui.view">
+            <field name="name">qms.document.type.form</field>
+            <field name="model">qms.document.type</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Document Type Name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="code"/>
+                                <field name="sequence"/>
+                                <field name="active"/>
+                            </group>
+                            <group>
+                                <field name="approval_required"/>
+                                <field name="review_required"/>
+                                <field name="revision_control"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Description">
+                                <field name="description"/>
+                            </page>
+                            <page string="Access Rights">
+                                <group>
+                                    <field name="reviewer_group_id"/>
+                                    <field name="approver_group_id"/>
+                                </group>
+                            </page>
+                            <page string="Configuration">
+                                <group>
+                                    <field name="template_id"/>
+                                    <field name="numbering_sequence_id"/>
+                                    <field name="retention_period"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Document Type Tree View -->
+        <record id="view_qms_document_type_tree" model="ir.ui.view">
+            <field name="name">qms.document.type.tree</field>
+            <field name="model">qms.document.type</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="approval_required"/>
+                    <field name="review_required"/>
+                    <field name="revision_control"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Document Type Action Window -->
+        <record id="action_qms_document_type" model="ir.actions.act_window">
+            <field name="name">Document Types</field>
+            <field name="res_model">qms.document.type</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first document type!
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_qms_document_type"
+                  name="Document Types"
+                  parent="menu_qms_configuration"
+                  action="action_qms_document_type"
+                  sequence="20"/>
+    </data>
+</odoo>

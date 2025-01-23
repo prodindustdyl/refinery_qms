@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Nonconformity Form View -->
+        <record id="view_qms_nonconformity_form" model="ir.ui.view">
+            <field name="name">qms.nonconformity.form</field>
+            <field name="model">qms.nonconformity</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_analyze" string="Start Analysis" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_plan" string="Plan Actions" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'analysis')]}"/>
+                        <button name="action_verify" string="Start Verification" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'action')]}"/>
+                        <button name="action_close" string="Close" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'verification')]}"/>
+                        <button name="action_cancel" string="Cancel" 
+                                type="object"
+                                attrs="{'invisible': [('state', 'in', ['closed', 'cancelled'])]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Nonconformity Title"/>
+                            </h1>
+                            <h2>
+                                <field name="code"/>
+                            </h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="type"/>
+                                <field name="origin"/>
+                                <field name="severity"/>
+                                <field name="process_id"/>
+                                <field name="department_id"/>
+                            </group>
+                            <group>
+                                <field name="reported_by_id"/>
+                                <field name="assigned_to_id"/>
+                                <field name="report_date"/>
+                                <field name="due_date"/>
+                                <field name="closure_date"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Description">
+                                <group>
+                                    <field name="description"/>
+                                    <field name="immediate_actions"/>
+                                    <field name="containment_actions"/>
+                                    <field name="standard_id"/>
+                                    <field name="requirement"/>
+                                </group>
+                            </page>
+                            <page string="Root Causes">
+                                <field name="root_cause_ids">
+                                    <tree editable="bottom">
+                                        <field name="category"/>
+                                        <field name="description"/>
+                                        <field name="analysis_method"/>
+                                        <field name="evidence"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Actions">
+                                <field name="action_ids">
+                                    <tree>
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name"/>
+                                        <field name="type"/>
+                                        <field name="responsible_id"/>
+                                        <field name="planned_date"/>
+                                        <field name="state"/>
+                                        <field name="effectiveness_result"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Costs">
+                                <field name="cost_ids">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="type"/>
+                                        <field name="amount"/>
+                                        <field name="date"/>
+                                        <field name="notes"/>
+                                    </tree>
+                                </field>
+                                <group class="oe_subtotal_footer">
+                                    <field name="total_cost" widget="monetary"/>
+                                </group>
+                            </page>
+                            <page string="Effectiveness">
+                                <group>
+                                    <field name="effectiveness_check"/>
+                                    <field name="recurrence_check"/>
+                                    <field name="recurrence_period" 
+                                           attrs="{'invisible': [('recurrence_check', '=', False)]}"/>
+                                    <field name="recurrence_date" 
+                                           attrs="{'invisible': [('recurrence_check', '=', False)]}"/>
+                                    <field name="recurrence_notes" 
+                                           attrs="{'invisible': [('recurrence_check', '=', False)]}"/>
+                                </group>
+                            </page>
+                            <page string="Attachments">
+                                <field name="attachment_ids" widget="many2many_binary"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Nonconformity Tree View -->
+        <record id="view_qms_nonconformity_tree" model="ir.ui.view">
+            <field name="name">qms.nonconformity.tree</field>
+            <field name="model">qms.nonconformity</field>
+            <field name="arch" type="xml">
+                <tree decoration-info="state == 'draft'"
+                      decoration-warning="state in ['analysis', 'action']"
+                      decoration-success="state == 'closed'"
+                      decoration-danger="state == 'cancelled'">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="origin"/>
+                    <field name="severity"/>
+                    <field name="process_id"/>
+                    <field name="reported_by_id"/>
+                    <field name="report_date"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Nonconformity Search View -->
+        <record id="view_qms_nonconformity_search" model="ir.ui.view">
+            <field name="name">qms.nonconformity.search</field>
+            <field name="model">qms.nonconformity</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="type"/>
+                    <field name="origin"/>
+                    <field name="process_id"/>
+                    <field name="reported_by_id"/>
+                    <separator/>
+                    <filter string="My Nonconformities" name="my_nonconformities" 
+                            domain="['|', ('reported_by_id', '=', uid), ('assigned_to_id', '=', uid)]"/>
+                    <filter string="Open" name="open" 
+                            domain="[('state', 'not in', ['closed', 'cancelled'])]"/>
+                    <filter string="Critical" name="critical" 
+                            domain="[('severity', '=', 'critical')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Type" name="group_type" 
+                                context="{'group_by': 'type'}"/>
+                        <filter string="Origin" name="group_origin" 
+                                context="{'group_by': 'origin'}"/>
+                        <filter string="Process" name="group_process" 
+                                context="{'group_by': 'process_id'}"/>
+                        <filter string="State" name="group_state" 
+                                context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Corrective Action Form View -->
+        <record id="view_qms_corrective_action_form" model="ir.ui.view">
+            <field name="name">qms.corrective.action.form</field>
+            <field name="model">qms.corrective.action</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="type"/>
+                                <field name="description"/>
+                                <field name="responsible_id"/>
+                            </group>
+                            <group>
+                                <field name="planned_date"/>
+                                <field name="completion_date"/>
+                                <field name="effectiveness_criteria"/>
+                                <field name="effectiveness_result"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Effectiveness">
+                                <field name="effectiveness_evaluation"/>
+                            </page>
+                            <page string="Notes">
+                                <field name="notes"/>
+                            </page>
+                            <page string="Attachments">
+                                <field name="attachment_ids" widget="many2many_binary"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action Windows -->
+        <record id="action_qms_nonconformity" model="ir.actions.act_window">
+            <field name="name">Nonconformities</field>
+            <field name="res_model">qms.nonconformity</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_qms_nonconformity_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first nonconformity!
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_qms_nonconformity"
+                  name="Nonconformities"
+                  parent="menu_qms_root"
+                  action="action_qms_nonconformity"
+                  sequence="40"/>
+    </data>
+</odoo>

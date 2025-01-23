@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Password Policy Parameters -->
+        <record id="qms_password_validity_days" model="ir.config_parameter">
+            <field name="key">qms.password_validity_days</field>
+            <field name="value">90</field>
+        </record>
+
+        <record id="qms_password_minimum_length" model="ir.config_parameter">
+            <field name="key">qms.password_minimum_length</field>
+            <field name="value">8</field>
+        </record>
+
+        <record id="qms_password_require_special" model="ir.config_parameter">
+            <field name="key">qms.password_require_special</field>
+            <field name="value">True</field>
+        </record>
+
+        <!-- Default QMS User Groups -->
+        <record id="base.default_user" model="res.users">
+            <field name="groups_id" eval="[(4, ref('refinery_qms.group_qms_user'))]"/>
+        </record>
+    </data>
+</odoo>

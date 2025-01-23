@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Document Template Form View -->
+        <record id="view_qms_document_template_form" model="ir.ui.view">
+            <field name="name">qms.document.template.form</field>
+            <field name="model">qms.document.template</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Template Name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <field name="document_type_id"/>
+                            <field name="active"/>
+                        </group>
+                        <notebook>
+                            <page string="Template Content">
+                                <field name="content"/>
+                            </page>
+                            <page string="Header & Footer">
+                                <group>
+                                    <field name="header"/>
+                                    <field name="footer"/>
+                                </group>
+                            </page>
+                            <page string="Template Fields">
+                                <field name="field_ids">
+                                    <tree editable="bottom">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name"/>
+                                        <field name="field_type"/>
+                                        <field name="required"/>
+                                        <field name="default_value"/>
+                                        <field name="selection_options" 
+                                               attrs="{'invisible': [('field_type', '!=', 'selection')]}"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Description">
+                                <field name="description"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Document Template Tree View -->
+        <record id="view_qms_document_template_tree" model="ir.ui.view">
+            <field name="name">qms.document.template.tree</field>
+            <field name="model">qms.document.template</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="document_type_id"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Document Template Action Window -->
+        <record id="action_qms_document_template" model="ir.actions.act_window">
+            <field name="name">Document Templates</field>
+            <field name="res_model">qms.document.template</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first document template!
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_qms_document_template"
+                  name="Document Templates"
+                  parent="menu_qms_configuration"
+                  action="action_qms_document_template"
+                  sequence="40"/>
+    </data>
+</odoo>

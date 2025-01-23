@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- KPI Form View -->
+        <record id="view_qms_kpi_form" model="ir.ui.view">
+            <field name="name">qms.kpi.form</field>
+            <field name="model">qms.kpi</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_activate" string="Activate" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_deactivate" string="Deactivate" 
+                                type="object"
+                                attrs="{'invisible': [('state', '!=', 'active')]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="KPI Name"/>
+                            </h1>
+                            <h2>
+                                <field name="code"/>
+                            </h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="process_id"/>
+                                <field name="department_id"/>
+                                <field name="owner_id"/>
+                                <field name="category"/>
+                                <field name="measurement_frequency"/>
+                            </group>
+                            <group>
+                                <field name="unit"/>
+                                <field name="direction"/>
+                                <field name="target_value"/>
+                                <field name="min_value" attrs="{'required': [('direction', 'in', ['maximize', 'range'])]}"/>
+                                <field name="max_value" attrs="{'required': [('direction', 'in', ['minimize', 'range'])]}"/>
+                                <field name="current_value"/>
+                                <field name="trend"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Description">
+                                <group>
+                                    <field name="description"/>
+                                    <field name="calculation_method"/>
+                                    <field name="standard_ids" widget="many2many_tags"/>
+                                </group>
+                            </page>
+                            <page string="Measurements">
+                                <field name="measurement_ids">
+                                    <tree editable="bottom">
+                                        <field name="date"/>
+                                        <field name="value"/>
+                                        <field name="notes"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Alerts">
+                                <field name="alert_ids">
+                                    <tree>
+                                        <field name="date"/>
+                                        <field name="level"/>
+                                        <field name="message"/>
+                                        <field name="value"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Action Plans">
+                                <field name="action_plan_ids">
+                                    <tree>
+                                        <field name="name"/>
+                                        <field name="type"/>
+                                        <field name="priority"/>
+                                        <field name="responsible_id"/>
+                                        <field name="planned_date"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- KPI Tree View -->
+        <record id="view_qms_kpi_tree" model="ir.ui.view">
+            <field name="name">qms.kpi.tree</field>
+            <field name="model">qms.kpi</field>
+            <field name="arch" type="xml">
+                <tree decoration-success="trend == 'improving'"
+                      decoration-warning="trend == 'stable'"
+                      decoration-danger="trend == 'declining'">
+                    <field name="sequence" widget="handle"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="process_id"/>
+                    <field name="category"/>
+                    <field name="current_value"/>
+                    <field name="target_value"/>
+                    <field name="trend"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- KPI Search View -->
+        <record id="view_qms_kpi_search" model="ir.ui.view">
+            <field name="name">qms.kpi.search</field>
+            <field name="model">qms.kpi</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="process_id"/>
+                    <field name="category"/>
+                    <field name="owner_id"/>
+                    <separator/>
+                    <filter string="My KPIs" name="my_kpis" 
+                            domain="[('owner_id', '=', uid)]"/>
+                    <filter string="Active" name="active" 
+                            domain="[('state', '=', 'active')]"/>
+                    <filter string="Improving" name="improving" 
+                            domain="[('trend', '=', 'improving')]"/>
+                    <filter string="Declining" name="declining" 
+                            domain="[('trend', '=', 'declining')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Process" name="group_process" 
+                                context="{'group_by': 'process_id'}"/>
+                        <filter string="Category" name="group_category" 
+                                context="{'group_by': 'category'}"/>
+                        <filter string="Owner" name="group_owner" 
+                                context="{'group_by': 'owner_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- KPI Alert Form View -->
+        <record id="view_qms_kpi_alert_form" model="ir.ui.view">
+            <field name="name">qms.kpi.alert.form</field>
+            <field name="model">qms.kpi.alert</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_acknowledge" string="Acknowledge" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'new')]}"/>
+                        <button name="action_resolve" string="Resolve" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'acknowledged')]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="kpi_id"/>
+                                <field name="date"/>
+                                <field name="level"/>
+                                <field name="value"/>
+                            </group>
+                            <group>
+                                <field name="acknowledged_by_id"/>
+                                <field name="acknowledged_date"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Details">
+                                <group>
+                                    <field name="message"/>
+                                    <field name="resolution_notes"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- KPI Action Form View -->
+        <record id="view_qms_kpi_action_form" model="ir.ui.view">
+            <field name="name">qms.kpi.action.form</field>
+            <field name="model">qms.kpi.action</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_plan" string="Plan" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_start" string="Start" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'planned')]}"/>
+                        <button name="action_complete" string="Complete" 
+                                type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', '!=', 'in_progress')]}"/>
+                        <button name="action_cancel" string="Cancel" 
+                                type="object"
+                                attrs="{'invisible': [('state', 'in', ['completed', 'cancelled'])]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Action Title"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="kpi_id"/>
+                                <field name="type"/>
+                                <field name="priority" widget="priority"/>
+                                <field name="responsible_id"/>
+                            </group>
+                            <group>
+                                <field name="planned_date"/>
+                                <field name="completion_date"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Details">
+                                <group>
+                                    <field name="description"/>
+                                    <field name="expected_impact"/>
+                                    <field name="actual_impact"/>
+                                    <field name="notes"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action Windows -->
+        <record id="action_qms_kpi" model="ir.actions.act_window">
+            <field name="name">KPIs</field>
+            <field name="res_model">qms.kpi</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_qms_kpi_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first KPI!
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_qms_kpi"
+                  name="KPIs"
+                  parent="menu_qms_root"
+                  action="action_qms_kpi"
+                  sequence="50"/>
+    </data>
+</odoo>
